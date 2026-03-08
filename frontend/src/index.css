@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for pipeline application */
+
+/* Mapbox GL JS customizations */
+.mapboxgl-popup-content {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: white;
+}
+
+/* Base styles */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #f5f5f5;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Pipeline specific colors */
+.bg-pipeline-blue {
+  @apply bg-blue-600;
+}
+
+.text-pipeline-blue {
+  @apply text-blue-600;
+}
+
+.border-pipeline-blue {
+  @apply border-blue-600;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Feature cards */
+.feature-card {
+  @apply bg-white p-4 rounded-lg shadow-sm border border-gray-200 transition-all hover:shadow-md;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 transition-colors;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors;
+}
+
+/* Custom Mapbox layer styles */
+.layer-route {
+  @apply text-blue-600;
+}
+
+.layer-station {
+  @apply text-green-600;
+}
+
+.layer-valve {
+  @apply text-orange-600;
+}
+
+.layer-device {
+  @apply text-purple-600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 280px;
+    max-height: 50vh;
+    z-index: 10;
+    border-radius: 0 0 0.5rem 0;
+  }
+
+  .control-panel {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #0066cc;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Popup styles */
+.popup-header {
+  @apply font-bold text-sm text-gray-800 mb-2;
+}
+
+.popup-property {
+  @apply text-xs text-gray-700 mt-1;
+}
+
+.popup-label {
+  @apply font-semibold text-gray-600;
+}
+
+/* Info box */
+.info-box {
+  @apply bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-sm text-blue-700;
+}
+
+.warning-box {
+  @apply bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded text-sm text-yellow-700;
+}
+
+.error-box {
+  @apply bg-red-50 border-l-4 border-red-500 p-4 rounded text-sm text-red-700;
+}
+
+.success-box {
+  @apply bg-green-50 border-l-4 border-green-500 p-4 rounded text-sm text-green-700;
+}
