@@ -15,7 +15,8 @@ INSERT INTO pipelines_systems (name, operator_name, product, region) VALUES
 ('GasFlow Interstate System', 'GasFlow Inc', 'Natural Gas', 'Texas Panhandle'),
 ('Eagle Ford Liquids', 'Frontier Energy', 'Natural Gas Liquids', 'South Texas'),
 ('Bakken Express', 'Northern Plains Pipelines', 'Crude Oil', 'North Dakota'),
-('Colorado Gas Main', 'Rocky Mountain Gas', 'Natural Gas', 'Colorado');
+('Colorado Gas Main', 'Rocky Mountain Gas', 'Natural Gas', 'Colorado'),
+('Gulf-Canada Express', 'TransAmerica Energy', 'Crude Oil', 'Gulf to Canada');
 
 -- STEP 3: Insert Routes
 INSERT INTO pipelines_routes (system_id, name, geom, from_measure, to_measure, diameter_inches, material, length_miles) VALUES
@@ -35,7 +36,10 @@ INSERT INTO pipelines_routes (system_id, name, geom, from_measure, to_measure, d
 (4, 'Bakken Central Gather', ST_GeomFromText('LINESTRING(-103.5 48.5, -102.1 48.8)', 4326), 0, 200, 28, 'Steel', 200),
 
 -- Colorado routes
-(5, 'Colorado Front Range', ST_GeomFromText('LINESTRING(-105.0 40.0, -104.5 40.5)', 4326), 0, 75, 24, 'Steel', 75);
+(5, 'Colorado Front Range', ST_GeomFromText('LINESTRING(-105.0 40.0, -104.5 40.5)', 4326), 0, 75, 24, 'Steel', 75),
+
+-- Gulf-Canada Express
+(6, 'Gulf-Canada Express', ST_GeomFromText('LINESTRING(-89.0 28.5, -90.0 30.0, -89.0 33.0, -87.0 36.0, -85.0 39.0, -84.0 43.0)', 4326), 0, 1300, 42, 'Steel', 1300);
 
 -- STEP 4: Insert Pipe Segments
 INSERT INTO pipelines_segments (route_id, from_measure, to_measure, diameter_inches, material, operating_pressure_psi, installation_year) VALUES
@@ -61,6 +65,12 @@ INSERT INTO pipelines_stations (system_id, route_id, name, station_type, measure
 (1, 1, 'Fort Worth Pressure Control', 'regulator', 290, 750, NULL, NULL, ST_GeomFromText('POINT(-97.3331 32.7555)', 4326)),
 (1, 1, 'Houston Terminal Reception', 'reception', 345, 50, NULL, NULL, ST_GeomFromText('POINT(-95.3698 30.2672)', 4326)),
 
+-- Gulf-Canada Express stations
+(6, 9, 'Gulf Inlet Terminal', 'reception', 5, 50, NULL, NULL, ST_GeomFromText('POINT(-89.0 28.5)', 4326)),
+(6, 9, 'Memphis Meter Station', 'measurement', 300, 1200, NULL, NULL, ST_GeomFromText('POINT(-90.0 35.1)', 4326)),
+(6, 9, 'Chicago Compressor', 'compressor', 750, 1300, 800, 'HP', ST_GeomFromText('POINT(-87.6 41.8)', 4326)),
+(6, 9, 'Toronto Delivery Terminal', 'delivery', 1300, 50, NULL, NULL, ST_GeomFromText('POINT(-79.4 43.7)', 4326)),
+
 -- West Texas Branch
 (1, 2, 'West Texas Pump', 'pump', 10, 900, 250000, 'BPD', ST_GeomFromText('POINT(-101.9800 29.6800)', 4326)),
 (1, 2, 'Andrews Delivery', 'delivery', 50, 100, NULL, NULL, ST_GeomFromText('POINT(-101.8821 29.5764)', 4326)),
@@ -83,7 +93,14 @@ INSERT INTO pipelines_valves (route_id, name, valve_type, measure, normal_positi
 (1, 'Fort Worth Blowdown 001', 'isolation', 292, 'closed', 2, 300, ST_GeomFromText('POINT(-97.3200 32.7600)', 4326)),
 (1, 'Houston Terminal Block', 'isolation', 348, 'open', 36, 1000, ST_GeomFromText('POINT(-95.3600 30.2700)', 4326)),
 
+-- Gulf-Canada Express valves
+(6, 'Gulf Inlet Block Valve', 'isolation', 5, 'open', 42, 1400, ST_GeomFromText('POINT(-89.0 28.5)', 4326)),
+(6, 'Memphis Check Valve', 'check', 305, 'open', 42, 1400, ST_GeomFromText('POINT(-90.0 35.1)', 4326)),
+(6, 'Chicago Compressor Valve', 'isolation', 755, 'open', 42, 1400, ST_GeomFromText('POINT(-87.6 41.8)', 4326)),
+(6, 'Toronto Delivery Block', 'isolation', 1295, 'open', 42, 1400, ST_GeomFromText('POINT(-79.4 43.7)', 4326));
+
 -- West Texas Branch
+INSERT INTO pipelines_valves (route_id, name, valve_type, measure, normal_position, size_inches, rating_psi, geom) VALUES
 (2, 'West Texas Block Valve', 'isolation', 8, 'open', 24, 1200, ST_GeomFromText('POINT(-101.9900 29.6700)', 4326)),
 (2, 'Andrews Inlet Check', 'check', 52, 'open', 24, 1000, ST_GeomFromText('POINT(-101.8700 29.5800)', 4326)),
 
