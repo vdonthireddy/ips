@@ -7,23 +7,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MAPLIBRE_STYLE = {
-  version: 8,
-  sources: {
-    osm: {
-      type: 'raster',
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'osm',
-      type: 'raster',
-      source: 'osm',
-    },
-  ],
-};
+// Use Maplibre's public demo style (world map + tiles)
+const MAPLIBRE_STYLE = 'https://demotiles.maplibre.org/style.json';
 
 function Map({
   selectedRoute,
