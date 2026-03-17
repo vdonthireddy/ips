@@ -4,27 +4,22 @@ A complete, production-ready GIS web application for pipeline infrastructure man
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────┐
-│   React Frontend (Maplibre GL JS)       │
-│   • Interactive map visualization       │
-│   • Pipeline list sidebar               │
-│   • Feature selection & details         │
-└────────────────┬────────────────────────┘
-                 │ HTTP/REST
-┌────────────────▼────────────────────────┐   ┌───────────────────────────┐
-│   FastAPI Backend                       │   │   Local Tile Server       │
-│   • GeoJSON endpoints                   │◄──┤   (Nginx Docker)          │
-│   • Spatial queries (ST_DWithin, etc.)  │   │   • Offline DemoTiles     │
-│   • Async/await with asyncpg            │   │   • No API Key Required   │
-└────────────────┬────────────────────────┘   └───────────────────────────┘
-                 │ SQL
-┌────────────────▼────────────────────────┐
-│   PostgreSQL + PostGIS                  │
-│   • PODS-inspired schema                │
-│   • Spatial indexes (GIST)              │
-│   • Expanded US/Canada Pipeline data    │
-└─────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Browser [Browser / Client]
+        A[React Frontend]
+        B[Maplibre GL JS]
+    end
+
+    subgraph Containers [Docker Services]
+        C[FastAPI Backend]
+        D[Local Tile Server <br/> Nginx]
+        E[(PostgreSQL + PostGIS)]
+    end
+
+    A -- "REST API / GeoJSON" --> C
+    B -- "Vector Tiles & Styles" --> D
+    C -- "Spatial SQL Queries" --> E
 ```
 
 ## Features
