@@ -67,3 +67,4 @@ dist/
 build/
 dist/
 *.egg-info/
+map-data/

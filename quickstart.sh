@@ -38,10 +38,16 @@ echo ""
 
 # Start services
 if [ "$USE_DOCKER" = true ]; then
-    echo -e "${BLUE}Starting Docker services...${NC}"
+    echo -e "${BLUE}Stopping existing Docker services and removing volumes...${NC}"
+    docker compose down -v --remove-orphans
+    
+    echo -e "${BLUE}Rebuilding and starting Docker services from scratch...${NC}"
+    docker compose build --no-cache
     docker compose up -d
-    echo -e "${GREEN}✓ PostgreSQL + FastAPI started${NC}"
-    sleep 15
+    
+    echo -e "${GREEN}✓ PostgreSQL + FastAPI + TileServer started${NC}"
+    echo -e "${BLUE}Waiting for database to be healthy...${NC}"
+    sleep 20
 else
     echo -e "${BLUE}Setting up native PostgreSQL...${NC}"
     DB_NAME="pipeline_gis"
@@ -66,7 +72,10 @@ echo ""
 echo -e "${BLUE}Starting React frontend...${NC}"
 cd frontend
 [ ! -d "node_modules" ] && npm install -q
-echo -e "${GREEN}✓ Dependencies installed${NC}"
+
+# Clear Vite cache
+rm -rf node_modules/.vite
+echo -e "${GREEN}✓ Frontend cache cleared${NC}"
 
 # Create .env
 if [ ! -f ".env" ]; then

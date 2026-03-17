@@ -93,7 +93,11 @@ INSERT INTO pipelines_valves (route_id, name, valve_type, measure, normal_positi
 (1, 'Fort Worth Blowdown 001', 'isolation', 292, 'closed', 2, 300, ST_GeomFromText('POINT(-97.3200 32.7600)', 4326)),
 (1, 'Houston Terminal Block', 'isolation', 348, 'open', 36, 1000, ST_GeomFromText('POINT(-95.3600 30.2700)', 4326)),
 
--- Gulf-Canada Express valves
+-- Gulf-Canada Express segments
+(6, 0, 300, 42, 'Steel', 1200, 2012),
+(6, 300, 600, 42, 'Steel', 1200, 2012),
+(6, 600, 950, 36, 'Composite', 1100, 2015),
+(6, 950, 1300, 36, 'Steel', 1150, 2018);
 (6, 'Gulf Inlet Block Valve', 'isolation', 5, 'open', 42, 1400, ST_GeomFromText('POINT(-89.0 28.5)', 4326)),
 (6, 'Memphis Check Valve', 'check', 305, 'open', 42, 1400, ST_GeomFromText('POINT(-90.0 35.1)', 4326)),
 (6, 'Chicago Compressor Valve', 'isolation', 755, 'open', 42, 1400, ST_GeomFromText('POINT(-87.6 41.8)', 4326)),

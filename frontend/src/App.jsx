@@ -21,7 +21,7 @@ function App() {
   const [devicesData, setDevicesData] = useState(null);
   const [segmentsData, setSegmentsData] = useState(null);
 
-  const [showSegments, setShowSegments] = useState(false);
+  const [showSegments, setShowSegments] = useState(true);
   const [showStations, setShowStations] = useState(true);
   const [showValves, setShowValves] = useState(true);
   const [showDevices, setShowDevices] = useState(false);
@@ -52,16 +52,18 @@ function App() {
       const route = await getRoute(routeId);
       setRouteData(route);
 
-      // Fetch stations, valves, devices
-      const [stations, valves, devices] = await Promise.all([
+      // Fetch stations, valves, devices, and segments
+      const [stations, valves, devices, segments] = await Promise.all([
         getRouteStations(routeId),
         getRouteValves(routeId),
         getRouteDevices(routeId),
+        getRouteSegments(routeId),
       ]);
 
       setStationsData(stations);
       setValvesData(valves);
       setDevicesData(devices);
+      setSegmentsData(segments);
     } catch (err) {
       setError(`Failed to load route data: ${err.message}`);
       console.error(err);
@@ -223,6 +225,7 @@ function App() {
             showValves={showValves}
             showDevices={showDevices}
             routeData={routeData}
+            segmentsData={segmentsData}
             stationsData={stationsData}
             valvesData={valvesData}
             devicesData={devicesData}

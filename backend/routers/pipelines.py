@@ -283,56 +283,95 @@ async def get_route_segments(
     """
     Get all pipe segments for a route.
     
-    Returns: GeoJSON FeatureCollection with Point features (segment midpoints)
-    and full attribute information.
+    Uses PostGIS ST_LineSubstring to dynamically calculate the geometry 
+    of each segment based on its measure range.
+    
+    Returns: GeoJSON FeatureCollection with LineString features.
     """
-    # Verify route exists
-    route_stmt = select(PipelineRoute).where(PipelineRoute.id == route_id)
+    # Verify route exists and get its geometry and total measure range
+    route_stmt = select(
+        PipelineRoute.id,
+        PipelineRoute.from_measure,
+        PipelineRoute.to_measure,
+        geofunc.ST_Length(geofunc.ST_Transform(PipelineRoute.geom, 3857)).label("geom_length_meters")
+    ).where(PipelineRoute.id == route_id)
+    
     route_result = await session.execute(route_stmt)
-    if not route_result.scalars().one_or_none():
+    route = route_result.first()
+    if not route:
         raise HTTPException(status_code=404, detail="Route not found")
     
-    # Get segments with computed midpoint geometries
-    stmt = select(PipelineSegment).where(
-        PipelineSegment.route_id == route_id
-    ).order_by(PipelineSegment.from_measure)
+    # Prefer explicit measures, fallback to geometric length if needed
+    route_from = float(route.from_measure) if route.from_measure is not None else 0
+    route_to = float(route.to_measure) if route.to_measure is not None else 0
+    
+    # If route_to is 0 or null, we might need to calculate it from segments or geometry
+    if route_to <= 0:
+        # Calculate max segment to_measure as a fallback
+        max_seg_stmt = select(func.max(PipelineSegment.to_measure)).where(PipelineSegment.route_id == route_id)
+        max_seg_res = await session.execute(max_seg_stmt)
+        max_measure = max_seg_res.scalar()
+        if max_measure:
+            route_to = float(max_measure)
+        else:
+            # Absolute fallback to 1.0 for interpolation if no measures exist
+            route_to = 1.0
+            
+    route_length = route_to - route_from
+    
+    if route_length <= 0:
+        # Fallback if measures are not properly set
+        stmt = select(PipelineSegment).where(PipelineSegment.route_id == route_id)
+        result = await session.execute(stmt)
+        segments = result.scalars().all()
+        return {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "id": s.id,
+                "geometry": None,
+                "properties": {"id": s.id, "error": "Invalid route length"}
+            } for s in segments]
+        }
+
+    # Query segments and use ST_LineSubstring to get their specific geometry
+    # We must normalize the measures to 0.0 - 1.0 for ST_LineSubstring
+    # We use COALESCE to handle nulls in from/to measures
+    stmt = text("""
+        SELECT 
+            s.id, s.from_measure, s.to_measure, s.diameter_inches, 
+            s.material, s.grade, s.wall_thickness_inches,
+            ST_AsGeoJSON(
+                ST_LineSubstring(
+                    r.geom,
+                    LEAST(GREATEST((s.from_measure - COALESCE(r.from_measure, 0)) / NULLIF(COALESCE(r.to_measure, :fallback_to) - COALESCE(r.from_measure, 0), 0), 0), 1),
+                    LEAST(GREATEST((s.to_measure - COALESCE(r.from_measure, 0)) / NULLIF(COALESCE(r.to_measure, :fallback_to) - COALESCE(r.from_measure, 0), 0), 0), 1)
+                )
+            ) as segment_geom_json
+        FROM pipelines_segments s
+        JOIN pipelines_routes r ON s.route_id = r.id
+        WHERE s.route_id = :route_id
+        ORDER BY s.from_measure
+    """).bindparams(route_id=route_id, fallback_to=route_to)
     
     result = await session.execute(stmt)
-    segments = result.scalars().all()
+    rows = result.all()
     
     features = []
-    for segment in segments:
-        # Get route geometry to calculate segment midpoint
-        route_geom_stmt = select(PipelineRoute.geom).where(
-            PipelineRoute.id == route_id
-        )
-        route_geom_result = await session.execute(route_geom_stmt)
-        route_geom = route_geom_result.scalar()
-        
-        # For simplicity, use segment measure midpoint
-        # In production, could interpolate along LineString
-        mid_measure = (float(segment.from_measure) + float(segment.to_measure)) / 2
-        
+    for row in rows:
         features.append({
             "type": "Feature",
-            "id": segment.id,
-            "geometry": {
-                "type": "Point",
-                "coordinates": [0, 0]  # Placeholder; ideally interpolate from route
-            },
+            "id": row.id,
+            "geometry": json.loads(row.segment_geom_json) if row.segment_geom_json else None,
             "properties": {
-                "id": segment.id,
-                "route_id": segment.route_id,
-                "from_measure": float(segment.from_measure),
-                "to_measure": float(segment.to_measure),
-                "diameter_inches": segment.diameter_inches,
-                "wall_thickness_inches": float(segment.wall_thickness_inches) if segment.wall_thickness_inches else None,
-                "material": segment.material,
-                "grade": segment.grade,
-                "coating": segment.coating,
-                "joint_type": segment.joint_type,
-                "installation_year": segment.installation_year,
-                "operating_pressure_psi": segment.operating_pressure_psi,
+                "id": row.id,
+                "from_measure": float(row.from_measure),
+                "to_measure": float(row.to_measure),
+                "length": round(float(row.to_measure) - float(row.from_measure), 3),
+                "diameter_inches": row.diameter_inches,
+                "material": row.material,
+                "grade": row.grade,
+                "wall_thickness_inches": float(row.wall_thickness_inches) if row.wall_thickness_inches else None,
             }
         })
     
