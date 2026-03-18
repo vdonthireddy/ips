@@ -388,38 +388,34 @@ async def get_route_stations(
 ):
     """
     Get all stations on a route as GeoJSON with Point geometries.
-    
-    Returns: GeoJSON FeatureCollection with Point features for each station.
     """
-    # Verify route exists
-    route_stmt = select(PipelineRoute).where(PipelineRoute.id == route_id)
-    route_result = await session.execute(route_stmt)
-    if not route_result.scalars().one_or_none():
-        raise HTTPException(status_code=404, detail="Route not found")
-    
-    stmt = select(PipelineStation).where(
-        PipelineStation.route_id == route_id
-    ).order_by(PipelineStation.measure)
+    stmt = text("""
+        SELECT 
+            id, name, station_type, measure, capacity_units, 
+            capacity_value, operating_pressure_psi,
+            ST_AsGeoJSON(geom) as geometry_json
+        FROM pipelines_stations
+        WHERE route_id = :route_id
+        ORDER BY measure
+    """).bindparams(route_id=route_id)
     
     result = await session.execute(stmt)
-    stations = result.scalars().all()
+    rows = result.all()
     
     features = []
-    for station in stations:
-        geom_dict = geometry_to_geojson(station.geom)
-        
+    for row in rows:
         features.append({
             "type": "Feature",
-            "id": station.id,
-            "geometry": geom_dict,
+            "id": row.id,
+            "geometry": json.loads(row.geometry_json) if row.geometry_json else None,
             "properties": {
-                "id": station.id,
-                "name": station.name,
-                "station_type": station.station_type,
-                "measure": float(station.measure),
-                "capacity_units": station.capacity_units,
-                "capacity_value": station.capacity_value,
-                "operating_pressure_psi": station.operating_pressure_psi,
+                "id": row.id,
+                "name": row.name,
+                "station_type": row.station_type,
+                "measure": float(row.measure),
+                "capacity_units": row.capacity_units,
+                "capacity_value": row.capacity_value,
+                "operating_pressure_psi": row.operating_pressure_psi,
             }
         })
     
@@ -437,44 +433,41 @@ async def get_route_valves(
 ):
     """
     Get all valves on a route as GeoJSON with Point geometries.
-    
-    Query Parameters:
-    - valve_type: Filter by valve type (isolation, block, check, relief, regulator)
-    
-    Returns: GeoJSON FeatureCollection with Point features for each valve.
     """
-    # Verify route exists
-    route_stmt = select(PipelineRoute).where(PipelineRoute.id == route_id)
-    route_result = await session.execute(route_stmt)
-    if not route_result.scalars().one_or_none():
-        raise HTTPException(status_code=404, detail="Route not found")
-    
-    stmt = select(PipelineValve).where(
-        PipelineValve.route_id == route_id
-    ).order_by(PipelineValve.measure)
-    
+    params = {"route_id": route_id}
+    stmt_str = """
+        SELECT 
+            id, name, valve_type, normal_position, measure, 
+            size_inches, rating_psi,
+            ST_AsGeoJSON(geom) as geometry_json
+        FROM pipelines_valves
+        WHERE route_id = :route_id
+    """
     if valve_type:
-        stmt = stmt.where(PipelineValve.valve_type.ilike(f"%{valve_type}%"))
+        stmt_str += " AND valve_type ILIKE :valve_type"
+        params["valve_type"] = f"%{valve_type}%"
+    
+    stmt_str += " ORDER BY measure"
+    
+    stmt = text(stmt_str).bindparams(**params)
     
     result = await session.execute(stmt)
-    valves = result.scalars().all()
+    rows = result.all()
     
     features = []
-    for valve in valves:
-        geom_dict = geometry_to_geojson(valve.geom)
-        
+    for row in rows:
         features.append({
             "type": "Feature",
-            "id": valve.id,
-            "geometry": geom_dict,
+            "id": row.id,
+            "geometry": json.loads(row.geometry_json) if row.geometry_json else None,
             "properties": {
-                "id": valve.id,
-                "name": valve.name or f"Valve MP{valve.measure}",
-                "valve_type": valve.valve_type,
-                "normal_position": valve.normal_position,
-                "measure": float(valve.measure),
-                "size_inches": float(valve.size_inches) if valve.size_inches else None,
-                "rating_psi": valve.rating_psi,
+                "id": row.id,
+                "name": row.name or f"Valve MP{row.measure}",
+                "valve_type": row.valve_type,
+                "normal_position": row.normal_position,
+                "measure": float(row.measure),
+                "size_inches": float(row.size_inches) if row.size_inches else None,
+                "rating_psi": row.rating_psi,
             }
         })
     
@@ -492,43 +485,39 @@ async def get_route_devices(
 ):
     """
     Get all inline devices on a route as GeoJSON with Point geometries.
-    
-    Query Parameters:
-    - device_type: Filter by device type (meter, scraper_trap, separator, heater)
-    
-    Returns: GeoJSON FeatureCollection with Point features for each device.
     """
-    # Verify route exists
-    route_stmt = select(PipelineRoute).where(PipelineRoute.id == route_id)
-    route_result = await session.execute(route_stmt)
-    if not route_result.scalars().one_or_none():
-        raise HTTPException(status_code=404, detail="Route not found")
-    
-    stmt = select(PipelineInlineDevice).where(
-        PipelineInlineDevice.route_id == route_id
-    ).order_by(PipelineInlineDevice.measure)
-    
+    params = {"route_id": route_id}
+    stmt_str = """
+        SELECT 
+            id, name, device_type, measure, capacity_units, capacity_value,
+            ST_AsGeoJSON(geom) as geometry_json
+        FROM pipelines_inline_devices
+        WHERE route_id = :route_id
+    """
     if device_type:
-        stmt = stmt.where(PipelineInlineDevice.device_type.ilike(f"%{device_type}%"))
+        stmt_str += " AND device_type ILIKE :device_type"
+        params["device_type"] = f"%{device_type}%"
+        
+    stmt_str += " ORDER BY measure"
+    
+    stmt = text(stmt_str).bindparams(**params)
     
     result = await session.execute(stmt)
-    devices = result.scalars().all()
+    rows = result.all()
     
     features = []
-    for device in devices:
-        geom_dict = geometry_to_geojson(device.geom)
-        
+    for row in rows:
         features.append({
             "type": "Feature",
-            "id": device.id,
-            "geometry": geom_dict,
+            "id": row.id,
+            "geometry": json.loads(row.geometry_json) if row.geometry_json else None,
             "properties": {
-                "id": device.id,
-                "name": device.name or f"Device MP{device.measure}",
-                "device_type": device.device_type,
-                "measure": float(device.measure),
-                "capacity_units": device.capacity_units,
-                "capacity_value": float(device.capacity_value) if device.capacity_value else None,
+                "id": row.id,
+                "name": row.name or f"Device MP{row.measure}",
+                "device_type": row.device_type,
+                "measure": float(row.measure),
+                "capacity_units": row.capacity_units,
+                "capacity_value": float(row.capacity_value) if row.capacity_value else None,
             }
         })
     

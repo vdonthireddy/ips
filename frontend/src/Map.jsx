@@ -44,24 +44,6 @@ function Map({
       if (onMapClick) onMapClick(e.lngLat);
     });
 
-    // Add mouse move listener for hover effects
-    map.current.on('mousemove', 'segments-layer', (e) => {
-      if (e.features.length > 0) {
-        const feature = e.features[0];
-        setHoverInfo({
-          properties: feature.properties,
-          x: e.point.x,
-          y: e.point.y
-        });
-        map.current.getCanvas().style.cursor = 'pointer';
-      }
-    });
-
-    map.current.on('mouseleave', 'segments-layer', () => {
-      setHoverInfo(null);
-      map.current.getCanvas().style.cursor = '';
-    });
-
     return () => {
       if (map.current) {
         map.current.remove();
@@ -116,7 +98,7 @@ function Map({
   useEffect(() => {
     if (!map.current) return;
 
-    const manageLayer = (sourceId, layerId, data, type, paint, isVisible) => {
+    const manageLayer = (sourceId, layerId, data, type, paint, isVisible, beforeId = null) => {
       const hasSource = map.current.getSource(sourceId);
       const hasLayer = map.current.getLayer(layerId);
 
@@ -129,11 +111,11 @@ function Map({
       if (hasSource) {
         map.current.getSource(sourceId).setData(data);
         if (!hasLayer) {
-          map.current.addLayer({ id: layerId, type, source: sourceId, paint });
+          map.current.addLayer({ id: layerId, type, source: sourceId, paint }, beforeId);
         }
       } else {
         map.current.addSource(sourceId, { type: 'geojson', data });
-        map.current.addLayer({ id: layerId, type, source: sourceId, paint });
+        map.current.addLayer({ id: layerId, type, source: sourceId, paint }, beforeId);
         map.current.on('click', layerId, handleLayerClick);
       }
     };
@@ -148,11 +130,19 @@ function Map({
             { hover: false }
           );
         }
-        hoveredId = e.features[0].id;
+        const feature = e.features[0];
+        hoveredId = feature.id;
         map.current.setFeatureState(
           { source: 'segments-source', id: hoveredId },
           { hover: true }
         );
+        
+        setHoverInfo({
+          properties: feature.properties,
+          x: e.point.x,
+          y: e.point.y
+        });
+        map.current.getCanvas().style.cursor = 'pointer';
       }
     };
 
@@ -164,6 +154,8 @@ function Map({
         );
       }
       hoveredId = null;
+      setHoverInfo(null);
+      map.current.getCanvas().style.cursor = '';
     };
 
     // Render Segments
@@ -182,7 +174,7 @@ function Map({
         8,
         5
       ],
-      'line-opacity': 1.0,
+      'line-opacity': 0.7,
     }, showSegments);
 
     // Add hover highlighting logic
@@ -203,26 +195,48 @@ function Map({
         'delivery', '#00aa00',
         '#cccccc',
       ],
-      'circle-opacity': 0.8,
+      'circle-opacity': 1.0,
       'circle-stroke-width': 2,
       'circle-stroke-color': '#ffffff',
     }, showStations);
 
     manageLayer('valves-source', 'valves-layer', valvesData, 'circle', {
       'circle-radius': 6,
-      'circle-color': '#ff9900',
-      'circle-opacity': 0.8,
-      'circle-stroke-width': 1,
+      'circle-color': [
+        'match',
+        ['get', 'valve_type'],
+        'relief', '#ff3300',
+        'check', '#ffcc00',
+        'isolation', '#ff9900',
+        '#ff9900'
+      ],
+      'circle-opacity': 1.0,
+      'circle-stroke-width': 2,
       'circle-stroke-color': '#ffffff',
     }, showValves);
 
     manageLayer('devices-source', 'devices-layer', devicesData, 'circle', {
       'circle-radius': 6,
       'circle-color': '#9966ff',
-      'circle-opacity': 0.8,
-      'circle-stroke-width': 1,
+      'circle-opacity': 1.0,
+      'circle-stroke-width': 2,
       'circle-stroke-color': '#ffffff',
     }, showDevices);
+
+    // Add click listeners for all point layers
+    if (map.current) {
+      ['stations-layer', 'valves-layer', 'devices-layer'].forEach(layerId => {
+        if (map.current.getLayer(layerId)) {
+          map.current.on('click', layerId, handleLayerClick);
+          map.current.on('mouseenter', layerId, () => {
+            map.current.getCanvas().style.cursor = 'pointer';
+          });
+          map.current.on('mouseleave', layerId, () => {
+            map.current.getCanvas().style.cursor = '';
+          });
+        }
+      });
+    }
 
     // Return cleanup for this effect's listeners
     return () => {
@@ -278,34 +292,52 @@ function Map({
           </h3>
 
           <div className="text-xs text-gray-700 space-y-1">
+            {popupInfo.properties?.measure !== undefined && (
+              <div>
+                <span className="font-semibold text-gray-500">Location:</span>{' '}
+                MP {popupInfo.properties.measure}
+              </div>
+            )}
             {popupInfo.properties?.station_type && (
               <div>
-                <span className="font-semibold">Type:</span>{' '}
-                {popupInfo.properties.station_type}
+                <span className="font-semibold text-gray-500">Station Type:</span>{' '}
+                <span className="capitalize">{popupInfo.properties.station_type}</span>
               </div>
             )}
             {popupInfo.properties?.valve_type && (
               <div>
-                <span className="font-semibold">Type:</span>{' '}
-                {popupInfo.properties.valve_type}
+                <span className="font-semibold text-gray-500">Valve Type:</span>{' '}
+                <span className="capitalize">{popupInfo.properties.valve_type}</span>
               </div>
             )}
             {popupInfo.properties?.device_type && (
               <div>
-                <span className="font-semibold">Type:</span>{' '}
-                {popupInfo.properties.device_type}
+                <span className="font-semibold text-gray-500">Device Type:</span>{' '}
+                <span className="capitalize">{popupInfo.properties.device_type}</span>
               </div>
             )}
-            {popupInfo.properties?.diameter_inches && (
+            {popupInfo.properties?.capacity_value && (
               <div>
-                <span className="font-semibold">Diameter:</span>{' '}
-                {popupInfo.properties.diameter_inches}"
+                <span className="font-semibold text-gray-500">Capacity:</span>{' '}
+                {popupInfo.properties.capacity_value} {popupInfo.properties.capacity_units}
               </div>
             )}
-            {popupInfo.properties?.material && (
+            {popupInfo.properties?.size_inches && (
               <div>
-                <span className="font-semibold">Material:</span>{' '}
-                {popupInfo.properties.material}
+                <span className="font-semibold text-gray-500">Size:</span>{' '}
+                {popupInfo.properties.size_inches}"
+              </div>
+            )}
+            {popupInfo.properties?.operating_pressure_psi && (
+              <div>
+                <span className="font-semibold text-gray-500">Operating Pressure:</span>{' '}
+                {popupInfo.properties.operating_pressure_psi} PSI
+              </div>
+            )}
+            {popupInfo.properties?.normal_position && (
+              <div>
+                <span className="font-semibold text-gray-500">Normal Position:</span>{' '}
+                <span className="uppercase font-mono text-blue-600">{popupInfo.properties.normal_position}</span>
               </div>
             )}
           </div>

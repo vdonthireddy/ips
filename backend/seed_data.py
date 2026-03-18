@@ -190,15 +190,18 @@ SEGMENTS = [
 STATIONS = [
     # Permian Main Trunk stations
     {
+        "system_id": 1,
         "route_id": 1,
         "name": "Odessa Pump Station",
         "station_type": "pump",
         "measure": 5,
         "operating_pressure_psi": 850,
-        "capacity": 500000,
+        "capacity_value": 500000,
+        "capacity_units": "BPD",
         "geom": "POINT(-102.0779 29.8604)",
     },
     {
+        "system_id": 1,
         "route_id": 1,
         "name": "Midland Measurement",
         "station_type": "measurement",
@@ -207,15 +210,18 @@ STATIONS = [
         "geom": "POINT(-101.9151 31.7500)",
     },
     {
+        "system_id": 1,
         "route_id": 1,
         "name": "Abilene Pump #1",
         "station_type": "pump",
         "measure": 160,
         "operating_pressure_psi": 900,
-        "capacity": 500000,
+        "capacity_value": 500000,
+        "capacity_units": "BPD",
         "geom": "POINT(-99.7176 32.2477)",
     },
     {
+        "system_id": 1,
         "route_id": 1,
         "name": "Fort Worth Pressure Control",
         "station_type": "regulator",
@@ -224,6 +230,7 @@ STATIONS = [
         "geom": "POINT(-97.3331 32.7555)",
     },
     {
+        "system_id": 1,
         "route_id": 1,
         "name": "Houston Terminal Reception",
         "station_type": "reception",
@@ -233,15 +240,18 @@ STATIONS = [
     },
     # West Texas Branch
     {
+        "system_id": 1,
         "route_id": 2,
         "name": "West Texas Pump",
         "station_type": "pump",
         "measure": 10,
         "operating_pressure_psi": 900,
-        "capacity": 250000,
+        "capacity_value": 250000,
+        "capacity_units": "BPD",
         "geom": "POINT(-101.9800 29.6800)",
     },
     {
+        "system_id": 1,
         "route_id": 2,
         "name": "Andrews Delivery",
         "station_type": "delivery",
@@ -251,32 +261,62 @@ STATIONS = [
     },
     # OK-KS Gas Corridor
     {
+        "system_id": 2,
         "route_id": 4,
         "name": "Oklahoma City Compressor",
         "station_type": "compressor",
         "measure": 20,
         "operating_pressure_psi": 950,
-        "capacity": 500,
+        "capacity_value": 500,
+        "capacity_units": "HP",
         "geom": "POINT(-97.5169 35.4676)",
     },
     {
+        "system_id": 2,
         "route_id": 4,
         "name": "Kansas Compressor Station",
         "station_type": "compressor",
         "measure": 100,
         "operating_pressure_psi": 1050,
-        "capacity": 600,
+        "capacity_value": 600,
+        "capacity_units": "HP",
         "geom": "POINT(-97.8000 36.8000)",
+    },
+    # Panhandle Primary
+    {
+        "system_id": 2,
+        "route_id": 5,
+        "name": "Amarillo Compressor Station",
+        "station_type": "compressor",
+        "measure": 10,
+        "capacity_value": 1200,
+        "capacity_units": "HP",
+        "operating_pressure_psi": 950,
+        "geom": "POINT(-101.4 35.55)",
     },
     # Eagle Ford
     {
+        "system_id": 3,
         "route_id": 6,
         "name": "Eagle Ford Pump Station",
         "station_type": "pump",
         "measure": 25,
         "operating_pressure_psi": 880,
-        "capacity": 150000,
+        "capacity_value": 150000,
+        "capacity_units": "BPD",
         "geom": "POINT(-97.8000 27.9000)",
+    },
+    # Colorado Front Range
+    {
+        "system_id": 5,
+        "route_id": 8,
+        "name": "Greeley Compressor Station",
+        "station_type": "compressor",
+        "measure": 45,
+        "capacity_value": 800,
+        "capacity_units": "HP",
+        "operating_pressure_psi": 1050,
+        "geom": "POINT(-104.7 40.3)",
     },
 ]
 
@@ -285,10 +325,10 @@ VALVES = [
     {
         "route_id": 1,
         "name": "Odessa Block Valve 001",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 2,
-        "position": "open",
-        "operating_pressure_psi": 850,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 30,
         "geom": "POINT(-102.0700 29.7650)",
     },
@@ -297,18 +337,18 @@ VALVES = [
         "name": "Midland Check Valve 002",
         "valve_type": "check",
         "measure": 48,
-        "position": "open",
-        "operating_pressure_psi": 820,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 30,
         "geom": "POINT(-101.9000 31.7500)",
     },
     {
         "route_id": 1,
         "name": "Abilene Block Valve 003",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 155,
-        "position": "open",
-        "operating_pressure_psi": 900,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 30,
         "geom": "POINT(-99.7100 32.2500)",
     },
@@ -317,38 +357,38 @@ VALVES = [
         "name": "Abilene Pressure Relief",
         "valve_type": "relief",
         "measure": 165,
-        "position": "open",
-        "operating_pressure_psi": 900,
+        "normal_position": "open",
+        "rating_psi": 1000,
         "size_inches": 4,
         "geom": "POINT(-99.7200 32.2400)",
     },
     {
         "route_id": 1,
         "name": "Fort Worth Block Valve 004",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 285,
-        "position": "open",
-        "operating_pressure_psi": 750,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 30,
         "geom": "POINT(-97.3400 32.7500)",
     },
     {
         "route_id": 1,
         "name": "Fort Worth Blowdown 001",
-        "valve_type": "blowdown",
+        "valve_type": "isolation",
         "measure": 292,
-        "position": "closed",
-        "operating_pressure_psi": 0,
+        "normal_position": "closed",
+        "rating_psi": 300,
         "size_inches": 2,
         "geom": "POINT(-97.3200 32.7600)",
     },
     {
         "route_id": 1,
         "name": "Houston Terminal Block",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 348,
-        "position": "open",
-        "operating_pressure_psi": 50,
+        "normal_position": "open",
+        "rating_psi": 1000,
         "size_inches": 36,
         "geom": "POINT(-95.3600 30.2700)",
     },
@@ -356,10 +396,10 @@ VALVES = [
     {
         "route_id": 2,
         "name": "West Texas Block Valve",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 8,
-        "position": "open",
-        "operating_pressure_psi": 900,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 24,
         "geom": "POINT(-101.9900 29.6700)",
     },
@@ -368,8 +408,8 @@ VALVES = [
         "name": "Andrews Inlet Check",
         "valve_type": "check",
         "measure": 52,
-        "position": "open",
-        "operating_pressure_psi": 100,
+        "normal_position": "open",
+        "rating_psi": 1000,
         "size_inches": 24,
         "geom": "POINT(-101.8700 29.5800)",
     },
@@ -377,10 +417,10 @@ VALVES = [
     {
         "route_id": 4,
         "name": "Oklahoma Block Valve",
-        "valve_type": "gate",
+        "valve_type": "isolation",
         "measure": 15,
-        "position": "open",
-        "operating_pressure_psi": 950,
+        "normal_position": "open",
+        "rating_psi": 1500,
         "size_inches": 36,
         "geom": "POINT(-97.6000 35.3500)",
     },
@@ -389,8 +429,8 @@ VALVES = [
         "name": "Kansas Inlet Check",
         "valve_type": "check",
         "measure": 105,
-        "position": "open",
-        "operating_pressure_psi": 1050,
+        "normal_position": "open",
+        "rating_psi": 1500,
         "size_inches": 36,
         "geom": "POINT(-97.7500 36.9000)",
     },
@@ -399,8 +439,8 @@ VALVES = [
         "name": "Kansas Relief Valve",
         "valve_type": "relief",
         "measure": 108,
-        "position": "open",
-        "operating_pressure_psi": 1050,
+        "normal_position": "open",
+        "rating_psi": 1200,
         "size_inches": 6,
         "geom": "POINT(-97.7300 36.9100)",
     },
@@ -413,15 +453,13 @@ DEVICES = [
         "name": "Odessa Scraper Trap In",
         "device_type": "scraper_trap",
         "measure": 1,
-        "status": "active",
         "geom": "POINT(-102.0750 29.7620)",
     },
     {
         "route_id": 1,
         "name": "Midland Flow Meter",
-        "device_type": "flow_meter",
+        "device_type": "meter",
         "measure": 50,
-        "status": "active",
         "geom": "POINT(-101.9100 31.7510)",
     },
     {
@@ -429,15 +467,13 @@ DEVICES = [
         "name": "Fort Worth Scraper Trap Out",
         "device_type": "scraper_trap",
         "measure": 349,
-        "status": "active",
         "geom": "POINT(-95.3700 30.2650)",
     },
     {
         "route_id": 2,
         "name": "West Texas Flow Meter",
-        "device_type": "flow_meter",
+        "device_type": "meter",
         "measure": 30,
-        "status": "active",
         "geom": "POINT(-101.9800 29.5800)",
     },
 ]
@@ -448,13 +484,13 @@ def seed_database():
     session = SessionLocal()
     
     try:
-        # Clear existing data (optional - remove if you want to keep historical data)
-        session.execute(text("DELETE FROM pipelines_inline_devices;"))
-        session.execute(text("DELETE FROM pipelines_valves;"))
-        session.execute(text("DELETE FROM pipelines_stations;"))
-        session.execute(text("DELETE FROM pipelines_segments;"))
-        session.execute(text("DELETE FROM pipelines_routes;"))
-        session.execute(text("DELETE FROM pipelines_systems;"))
+        # Clear existing data
+        session.execute(text("TRUNCATE TABLE pipelines_inline_devices RESTART IDENTITY CASCADE;"))
+        session.execute(text("TRUNCATE TABLE pipelines_valves RESTART IDENTITY CASCADE;"))
+        session.execute(text("TRUNCATE TABLE pipelines_stations RESTART IDENTITY CASCADE;"))
+        session.execute(text("TRUNCATE TABLE pipelines_segments RESTART IDENTITY CASCADE;"))
+        session.execute(text("TRUNCATE TABLE pipelines_routes RESTART IDENTITY CASCADE;"))
+        session.execute(text("TRUNCATE TABLE pipelines_systems RESTART IDENTITY CASCADE;"))
         
         print("✓ Cleared existing data")
         
@@ -477,17 +513,13 @@ def seed_database():
             result = session.execute(
                 text("""
                     INSERT INTO pipelines_routes 
-                    (system_id, name, product, capacity_bpd, capacity_mmbtu, diameter_inches, length_miles, geom)
+                    (system_id, name, diameter_inches, length_miles, geom)
                     VALUES 
-                    (:system_id, :name, :product, :capacity_bpd, :capacity_mmbtu, :diameter_inches, :length_miles, 
+                    (:system_id, :name, :diameter_inches, :length_miles, 
                      ST_GeomFromText(:geom, 4326))
                     RETURNING id
                 """),
-                {
-                    **route,
-                    "capacity_mmbtu": route.get("capacity_mmbtu"),
-                    "capacity_bpd": route.get("capacity_bpd"),
-                }
+                route
             )
             route["id"] = result.scalar()
         
@@ -498,8 +530,8 @@ def seed_database():
             session.execute(
                 text("""
                     INSERT INTO pipelines_segments 
-                    (route_id, name, start_measure, end_measure, geom)
-                    VALUES (:route_id, :name, :start_measure, :end_measure, ST_GeomFromText(:geom, 4326))
+                    (route_id, from_measure, to_measure)
+                    VALUES (:route_id, :start_measure, :end_measure)
                 """),
                 segment
             )
@@ -511,8 +543,8 @@ def seed_database():
             session.execute(
                 text("""
                     INSERT INTO pipelines_stations 
-                    (route_id, name, station_type, measure, operating_pressure_psi, capacity, geom)
-                    VALUES (:route_id, :name, :station_type, :measure, :operating_pressure_psi, :capacity, 
+                    (system_id, route_id, name, station_type, measure, operating_pressure_psi, capacity_value, capacity_units, geom)
+                    VALUES (:system_id, :route_id, :name, :station_type, :measure, :operating_pressure_psi, :capacity_value, :capacity_units, 
                             ST_GeomFromText(:geom, 4326))
                 """),
                 station
@@ -525,8 +557,8 @@ def seed_database():
             session.execute(
                 text("""
                     INSERT INTO pipelines_valves 
-                    (route_id, name, valve_type, measure, position, operating_pressure_psi, size_inches, geom)
-                    VALUES (:route_id, :name, :valve_type, :measure, :position, :operating_pressure_psi, 
+                    (route_id, name, valve_type, measure, normal_position, rating_psi, size_inches, geom)
+                    VALUES (:route_id, :name, :valve_type, :measure, :normal_position, :rating_psi, 
                             :size_inches, ST_GeomFromText(:geom, 4326))
                 """),
                 valve
@@ -539,8 +571,8 @@ def seed_database():
             session.execute(
                 text("""
                     INSERT INTO pipelines_inline_devices 
-                    (route_id, name, device_type, measure, status, geom)
-                    VALUES (:route_id, :name, :device_type, :measure, :status, ST_GeomFromText(:geom, 4326))
+                    (route_id, name, device_type, measure, geom)
+                    VALUES (:route_id, :name, :device_type, :measure, ST_GeomFromText(:geom, 4326))
                 """),
                 device
             )

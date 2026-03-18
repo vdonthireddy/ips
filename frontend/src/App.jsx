@@ -24,7 +24,7 @@ function App() {
   const [showSegments, setShowSegments] = useState(true);
   const [showStations, setShowStations] = useState(true);
   const [showValves, setShowValves] = useState(true);
-  const [showDevices, setShowDevices] = useState(false);
+  const [showDevices, setShowDevices] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
